@@ -31,7 +31,7 @@ public class FractionalNumber {
         return result;
     }
 
-    public String convertNumber(String number){
+    public void convertNumber(String number){
         if(number.contains("/")){
             String[] firstNumber = number.split("/");
             setA(Integer.parseInt(firstNumber[0]));
@@ -41,7 +41,7 @@ public class FractionalNumber {
             setA(Integer.parseInt(number));
             setB(1);
         }
-        return toNormalNumber(getA(), getB());
+        //return toNormalNumber(getA(), getB());
     }
 
     public String convertString(String mathematicalExpression){
@@ -80,7 +80,7 @@ public class FractionalNumber {
                     setC(Integer.parseInt(result.get(i)));
                     setD(1);
                 }
-                //tmp = (calculate(a, b, c, d, operation));
+                tmp = (calculate(a, b, c, d, operation));
             }
 
         }
@@ -88,7 +88,7 @@ public class FractionalNumber {
         return finalResult.toString();
     }
 
-    private String calculate(int a, int b, int c, int d, String operation){
+    public String calculate(int a, int b, int c, int d, String operation){
         String result = "";
         int chislitel;
         int znamenatel;
@@ -117,11 +117,11 @@ public class FractionalNumber {
         return result;
     }
 
-    private String toNormalNumber(int chislitel, int znamenatel){
+    public String toNormalNumber(int chislitel, int znamenatel){
         int gcd = gcd(chislitel, znamenatel);
-        while (gcd != 1){
-            chislitel /= gcd;
-            znamenatel /= gcd;
+        while (Math.abs(gcd) != 1){
+            chislitel /= Math.abs(gcd);
+            znamenatel /= Math.abs(gcd);
             gcd = gcd(chislitel, znamenatel);
         }
         if(znamenatel == 1)
@@ -132,7 +132,9 @@ public class FractionalNumber {
         return chislitel + "/" + Math.abs(znamenatel);
     }
 
-    private int findLCM(int num1, int num2) {
+    public int findLCM(int num1, int num2) {
+        num1 = Math.abs(num1);
+        num2 = Math.abs(num2);
         int max = Math.max(num1, num2);
         int min = Math.min(num1, num2);
         int lcm = max;
@@ -141,7 +143,7 @@ public class FractionalNumber {
         }
         return lcm;
     }
-    private int gcd(int a, int b) {
+    public int gcd(int a, int b) {
         while (b != 0) {
             int temp = b;
             b = a % b;

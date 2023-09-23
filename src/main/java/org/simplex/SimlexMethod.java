@@ -1,12 +1,12 @@
 package org.simplex;
 
 public class SimlexMethod {
-    private FractionalNumber fractionalNumber = new FractionalNumber(1,1,1,1);
+    private FractionalNumber fractionalNumber = new FractionalNumber();
     private String[][] limitations;
 
     private String function;
     private String[] downFunction;
-    private boolean isMin;
+    private int min;
 
     public FractionalNumber getFractionalNumber() {
         return fractionalNumber;
@@ -20,8 +20,8 @@ public class SimlexMethod {
         this.limitations = limitations;
     }
 
-    public void setMin(boolean min) {
-        isMin = min;
+    public void setMin(int min) {
+        this.min = min;
     }
 
     public String[][] getLimitations() {
@@ -36,8 +36,8 @@ public class SimlexMethod {
         return downFunction;
     }
 
-    public boolean isMin() {
-        return isMin;
+    public int isMin() {
+        return min;
     }
 
     public void setFunction(String function) {
