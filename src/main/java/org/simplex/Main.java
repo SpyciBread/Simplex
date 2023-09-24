@@ -13,7 +13,5 @@ public class Main {
         System.out.println();
         System.out.println(Arrays.toString(calculateSimlex.getSimlexMethod().getDownFunction()));
         calculateSimlex.calculateSimplexTable(calculateSimlex.getSimlexMethod().getLimitations(), calculateSimlex.getSimlexMethod().getDownFunction());
-
-
     }
 }

@@ -39,6 +39,12 @@ public class CalculateSimlex {
         return replacingTheSign(downFunction);
     }
 
+    public String[][] transitionSimplexTable(String[][] simplexTable, int row, int col){
+
+
+        return simplexTable;
+    }
+
     public String[][] calculateSimplexTable(String[][] limit, String[] downFunction){
         int numRows = limit.length;
         int numCols = limit[0].length;
@@ -85,9 +91,12 @@ public class CalculateSimlex {
                 potentialReferenceElList.add(potentialReference);
             }
         }
+        if(potentialReferenceElList.size() == 0){
+            //поиск в другом отрицательном элементе
+        }
 
         String[] potentialReferenceArray = potentialReferenceElList.toArray(new String[potentialReferenceElList.size()]);
-        String referenceEl = findReferenceElement(potentialReferenceArray);
+        String referenceEl = findReferenceElementInRow(potentialReferenceArray);
         System.out.println(referenceEl);
 
 
@@ -120,7 +129,7 @@ public class CalculateSimlex {
         }
         return replacingArray;
     }
-    public String findReferenceElement(String[] list){
+    public String findReferenceElementInRow(String[] list){
         if(list.length == 1){
             return list[0];
         }
@@ -162,6 +171,9 @@ public class CalculateSimlex {
         for (String el : list) {
             if (el.charAt(0) == '-')
                 negativeEl.add(el);
+        }
+        if(negativeEl.size() == 0){
+            return "Тут условие, что нет отрицательных элементов";
         }
 
         if(negativeEl.size() == 1){
