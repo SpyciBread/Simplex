@@ -21,7 +21,7 @@ public class CalculateSimlex {
     public String[] calcualteDownFunction(String[][] limitations){
         int columnSize = limitations[0].length;
         int rowSize = limitations.length;
-        String[] downFunction = new String[limitations.length];
+        String[] downFunction = new String[columnSize];
         StringBuilder calucateString = new StringBuilder();
 
         for(int i = 0; i < columnSize; i++){
@@ -39,9 +39,47 @@ public class CalculateSimlex {
         return replacingTheSign(downFunction);
     }
 
+    public String operationWithTwoNumbers(String first, String second, String operation){
+        int a, b, c, d;
+        simlexMethod.getFractionalNumber().convertNumber(first);
+        a = simlexMethod.getFractionalNumber().getA();
+        b = simlexMethod.getFractionalNumber().getB();
+        simlexMethod.getFractionalNumber().convertNumber(second);
+        c = simlexMethod.getFractionalNumber().getA();
+        d = simlexMethod.getFractionalNumber().getB();
+        return simlexMethod.getFractionalNumber().calculate(a,b,c,d, operation);
+    }
+
     public String[][] transitionSimplexTable(String[][] simplexTable, int row, int col){
+        simplexTable[row][col] = operationWithTwoNumbers("1", simplexTable[row][col], "/");
+        String[] oldNumbers = new String[simplexTable.length];
 
+        for (int i = 0; i < simplexTable[row].length; i++){
+            if(i != col){
+                simplexTable[row][i] = operationWithTwoNumbers(simplexTable[row][i], simplexTable[row][col], "/");
+            }
+        }
 
+        for (int i = 0; i < simplexTable.length; i++){
+            oldNumbers[i] = simplexTable[i][col];
+            if(i != row){
+                simplexTable[i][col] = operationWithTwoNumbers(simplexTable[i][col], simplexTable[row][col], "/");
+                simplexTable[i][col] = operationWithTwoNumbers(simplexTable[i][col], "-1", "*");
+            }
+        }
+        String tmp;
+        for(int i = 0; i < simplexTable.length; i++){
+            if(i != row)
+                for (int j = 0; j < simplexTable[row].length; j++){
+                    if(j != col){
+                        tmp = operationWithTwoNumbers(oldNumbers[i], simplexTable[row][j], "*");
+                        simplexTable[i][j] = operationWithTwoNumbers(simplexTable[i][j], tmp, "-");
+                    }
+                }
+        }
+        for (int i = 0; i < simplexTable.length; i++) {
+            System.out.println(Arrays.toString(simplexTable[i]));
+        }
         return simplexTable;
     }
 
@@ -55,23 +93,22 @@ public class CalculateSimlex {
             }
         }
         simlexTable[numRows] = downFunction;
+        while (true){
+            String minEl = findMinEl(Arrays.copyOfRange(downFunction, 0, downFunction.length - 2));
+            int indexOfMinEl = 0;
 
-        String minEl = findMinEl(Arrays.copyOfRange(downFunction, 0, downFunction.length - 1));
-        int indexOfMinEl = 0;
-
-        for(int i = 0; i < downFunction.length; i++) {
-            if(minEl.equals(downFunction[i])){
-                indexOfMinEl = i;
-                break;
+            for(int i = 0; i < downFunction.length - 1; i++) {
+                if(minEl.equals(downFunction[i])){
+                    indexOfMinEl = i;
+                    break;
+                }
             }
+
+            findReferenceE(simlexTable, indexOfMinEl);
         }
 
-        findReferenceE(simlexTable, indexOfMinEl);
 
-        for (String[] strings : simlexTable) {
-            System.out.println(Arrays.toString(strings));
-        }
-        return simlexTable;
+        //return simlexTable;
     }
 
     private String[][] findReferenceE(String[][] simlexTable, int indexOfMinEl) {
@@ -110,7 +147,7 @@ public class CalculateSimlex {
             String el = simlexMethod.getFractionalNumber().calculate(c,d,a,b, "/");
             if(referenceEl.equals(el)){
                 System.out.println(simlexTable[i][indexOfMinEl]);
-                break;
+                return transitionSimplexTable(simlexTable, i, indexOfMinEl);
             }
         }
 
