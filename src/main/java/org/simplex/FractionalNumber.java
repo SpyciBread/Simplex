@@ -81,6 +81,7 @@ public class FractionalNumber {
                     setD(1);
                 }
                 tmp = (calculate(a, b, c, d, operation));
+
             }
 
         }

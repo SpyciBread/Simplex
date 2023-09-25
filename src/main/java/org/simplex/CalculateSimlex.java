@@ -56,14 +56,14 @@ public class CalculateSimlex {
 
         for (int i = 0; i < simplexTable[row].length; i++){
             if(i != col){
-                simplexTable[row][i] = operationWithTwoNumbers(simplexTable[row][i], simplexTable[row][col], "/");
+                simplexTable[row][i] = operationWithTwoNumbers(simplexTable[row][i], simplexTable[row][col], "*");
             }
         }
 
         for (int i = 0; i < simplexTable.length; i++){
             oldNumbers[i] = simplexTable[i][col];
             if(i != row){
-                simplexTable[i][col] = operationWithTwoNumbers(simplexTable[i][col], simplexTable[row][col], "/");
+                simplexTable[i][col] = operationWithTwoNumbers(simplexTable[i][col], simplexTable[row][col], "*");
                 simplexTable[i][col] = operationWithTwoNumbers(simplexTable[i][col], "-1", "*");
             }
         }
@@ -86,6 +86,7 @@ public class CalculateSimlex {
     public String[][] calculateSimplexTable(String[][] limit, String[] downFunction){
         int numRows = limit.length;
         int numCols = limit[0].length;
+
         String[][] simlexTable = new String[numRows + 1][numCols];
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
@@ -93,43 +94,73 @@ public class CalculateSimlex {
             }
         }
         simlexTable[numRows] = downFunction;
+        String[][] wrongSolution = {{"0"},{"0"}};
+        String[][] noSolution = {{"n"},{"n"}};
         while (true){
-            String minEl = findMinEl(Arrays.copyOfRange(downFunction, 0, downFunction.length - 2));
-            int indexOfMinEl = 0;
+//            String minEl = findMinEl(Arrays.copyOfRange(downFunction, 0, downFunction.length - 1));
+//
+//            int indexOfMinEl = 0;
+//            if(minEl.equals("Calculated")){
+//                return simlexTable;
+//            }
+//
+//            for(int i = 0; i < downFunction.length - 1; i++) {
+//                if(minEl.equals(downFunction[i]) && simlexMethod.getNegativeElementIndex() == i){
+//                    indexOfMinEl = i;
+//                    break;
+//                }
+//            }
 
-            for(int i = 0; i < downFunction.length - 1; i++) {
-                if(minEl.equals(downFunction[i])){
-                    indexOfMinEl = i;
-                    break;
+            if(Arrays.deepEquals(helpCalculateSimplexTable(simlexTable, downFunction), wrongSolution)){
+                while (true){
+                    if(Arrays.deepEquals(helpCalculateSimplexTable(simlexTable, downFunction), wrongSolution)){
+                        helpCalculateSimplexTable(simlexTable, downFunction);
+                    }
+                    else {
+                        if (Arrays.deepEquals(helpCalculateSimplexTable(simlexTable, downFunction), noSolution)){
+                            return simlexTable;
+                        }
+                        else break;
+                    }
                 }
             }
+            return helpCalculateSimplexTable(simlexTable, downFunction);
+        }
+    }
+    public String[][] helpCalculateSimplexTable(String[][] simlexTable, String[] downFunction){
+        String minEl = findMinEl(Arrays.copyOfRange(downFunction, 0, downFunction.length - 1));
 
-            findReferenceE(simlexTable, indexOfMinEl);
+        int indexOfMinEl = 0;
+        if(minEl.equals("Calculated")){
+            return simlexTable;
         }
 
+        if(minEl.equals("Функция неограничена")){
+            return new String[][]{{"n"}, {"n"}};
+        }
 
-        //return simlexTable;
+        for(int i = 0; i < downFunction.length - 1; i++) {
+            if(minEl.equals(downFunction[i]) && simlexMethod.getNegativeElementIndex() == i){
+                indexOfMinEl = i;
+                break;
+            }
+        }
+        return findReferenceE(simlexTable, indexOfMinEl);
     }
-
     private String[][] findReferenceE(String[][] simlexTable, int indexOfMinEl) {
         int numRows = simlexTable.length;
         List<String> potentialReferenceElList = new ArrayList<>();
-        int a, b, c, d;
         for(int i = 0; i < numRows - 1; i++){
             String potentialReference;
             if(simlexTable[i][indexOfMinEl].charAt(0) != '-' && simlexTable[i][indexOfMinEl].charAt(0) != '0'){
-                simlexMethod.getFractionalNumber().convertNumber(simlexTable[i][indexOfMinEl]);
-                a = simlexMethod.getFractionalNumber().getA();
-                b = simlexMethod.getFractionalNumber().getB();
-                simlexMethod.getFractionalNumber().convertNumber(simlexTable[i][simlexTable[0].length - 1]);
-                c = simlexMethod.getFractionalNumber().getA();
-                d = simlexMethod.getFractionalNumber().getB();
-                potentialReference = simlexMethod.getFractionalNumber().calculate(c,d,a,b, "/");
+                potentialReference = operationWithTwoNumbers(simlexTable[i][simlexTable[0].length - 1], simlexTable[i][indexOfMinEl], "/");
                 potentialReferenceElList.add(potentialReference);
             }
         }
         if(potentialReferenceElList.size() == 0){
             //поиск в другом отрицательном элементе
+            simlexMethod.getNegativeElements().add(indexOfMinEl);
+            return new String[][]{{"0"}, {"0"}};
         }
 
         String[] potentialReferenceArray = potentialReferenceElList.toArray(new String[potentialReferenceElList.size()]);
@@ -138,13 +169,7 @@ public class CalculateSimlex {
 
 
         for(int i = 0; i < numRows - 1; i++) {
-            simlexMethod.getFractionalNumber().convertNumber(simlexTable[i][indexOfMinEl]);
-            a = simlexMethod.getFractionalNumber().getA();
-            b = simlexMethod.getFractionalNumber().getB();
-            simlexMethod.getFractionalNumber().convertNumber(simlexTable[i][simlexTable[0].length - 1]);
-            c = simlexMethod.getFractionalNumber().getA();
-            d = simlexMethod.getFractionalNumber().getB();
-            String el = simlexMethod.getFractionalNumber().calculate(c,d,a,b, "/");
+            String el = operationWithTwoNumbers(simlexTable[i][simlexTable[0].length - 1], simlexTable[i][indexOfMinEl], "/");
             if(referenceEl.equals(el)){
                 System.out.println(simlexTable[i][indexOfMinEl]);
                 return transitionSimplexTable(simlexTable, i, indexOfMinEl);
@@ -161,7 +186,8 @@ public class CalculateSimlex {
             }
             else
             {
-                replacingArray[i] = "-" + replacingArray[i];
+                if(replacingArray[i].charAt(0) != '0')
+                    replacingArray[i] = "-" + replacingArray[i];
             }
         }
         return replacingArray;
@@ -204,16 +230,36 @@ public class CalculateSimlex {
     }
     public String findMinEl(String[] list){
         List<String> negativeEl = new ArrayList<>();
+        List<Integer> negativeElIndex = new ArrayList<>();
+        boolean isWrongEl = false;
+        int kolvoMinEl = 0;
         String minNegativEl;
-        for (String el : list) {
-            if (el.charAt(0) == '-')
-                negativeEl.add(el);
+        for (int i = 0; i < list.length; i++) {
+            if (list[i].charAt(0) == '-'){
+                kolvoMinEl++;
+                for(int j: simlexMethod.getNegativeElements())
+                    if(i == j){
+                        isWrongEl = true;
+                        break;
+                    }
+                if(!isWrongEl){
+                    negativeEl.add(list[i]);
+                    negativeElIndex.add(i);
+                }
+            }
         }
-        if(negativeEl.size() == 0){
-            return "Тут условие, что нет отрицательных элементов";
+        if(simlexMethod.getNegativeElements().size() == kolvoMinEl){
+            return "Функция неограничена";
         }
 
+        if(negativeEl.size() == 0){
+            return "Calculated";
+        }
+
+        //simlexMethod.setNegativeElements(negativeEl.toArray(new Integer[negativeEl.size()]));
+
         if(negativeEl.size() == 1){
+            simlexMethod.setNegativeElementIndex(negativeElIndex.get(0));
             return negativeEl.get(0);
         }
 
@@ -229,6 +275,10 @@ public class CalculateSimlex {
         a = a * (simlexMethod.getFractionalNumber().findLCM(b,d)/ b);
         c = c * (simlexMethod.getFractionalNumber().findLCM(b,d) / d);
         maxNegativNumber = Math.min(a,c);
+        if(maxNegativNumber == a)
+            simlexMethod.setNegativeElementIndex(negativeElIndex.get(0));
+        else
+            simlexMethod.setNegativeElementIndex(negativeElIndex.get(1));
 
         if(negativeEl.size() > 2){
             for(int i = 2; i < negativeEl.size(); i++){
@@ -247,6 +297,10 @@ public class CalculateSimlex {
                 c = c * (simlexMethod.getFractionalNumber().findLCM(b,d) / d);
 
                 maxNegativNumber = Math.min(a,c);
+                if(maxNegativNumber == a)
+                    simlexMethod.setNegativeElementIndex(negativeElIndex.get(i-1));
+                else
+                    simlexMethod.setNegativeElementIndex(negativeElIndex.get(i));
             }
         }
 
