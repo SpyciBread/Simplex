@@ -6,13 +6,88 @@ import java.util.List;
 public class SimlexMethod {
     private FractionalNumber fractionalNumber = new FractionalNumber();
     private String[][] limitations;
-
-    private String function;
+    private String[] notBasis;
+    private String[] basis;
+    private String[] startBasis;
+    private String[] startNotBasis;
+    private String[][] simplexTable;
+    private String minElInfo = "no";
+    private int iteration;
+    private String answer;
+    private String[] function;
     private String[] downFunction;
     private List<Integer> negativeElements = new ArrayList<>();
     private int quantityLimit;
     private int negativeElementIndex;
     private int min;
+
+    public String[] getStartNotBasis() {
+        return startNotBasis;
+    }
+
+    public void setStartNotBasis(String[] startNotBasis) {
+        this.startNotBasis = startNotBasis;
+    }
+
+    public String getMinElInfo() {
+        return minElInfo;
+    }
+
+    public void setMinElInfo(String minElInfo) {
+        this.minElInfo = minElInfo;
+    }
+
+    public String[] getStartBasis() {
+        return startBasis;
+    }
+
+    public void setStartBasis(String[] startBasis) {
+        this.startBasis = startBasis;
+    }
+
+    public int getIteration() {
+        return iteration;
+    }
+
+    public void setIteration(int iteration) {
+        this.iteration = iteration;
+    }
+
+    public void addIteration() {
+        this.iteration++;
+    }
+
+    public String[] getNotBasis() {
+        return notBasis;
+    }
+
+    public String[][] getSimplexTable() {
+        return simplexTable;
+    }
+
+    public void setSimplexTable(String[][] simplexTable) {
+        this.simplexTable = simplexTable;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public void setNotBasis(String[] notBasis) {
+        this.notBasis = notBasis;
+    }
+
+    public String[] getBasis() {
+        return basis;
+    }
+
+    public void setBasis(String[] basis) {
+        this.basis = basis;
+    }
 
     public FractionalNumber getFractionalNumber() {
         return fractionalNumber;
@@ -54,7 +129,7 @@ public class SimlexMethod {
         return limitations;
     }
 
-    public String getFunction() {
+    public String[] getFunction() {
         return function;
     }
 
@@ -66,7 +141,7 @@ public class SimlexMethod {
         return min;
     }
 
-    public void setFunction(String function) {
+    public void setFunction(String[] function) {
         this.function = function;
     }
 }
