@@ -3,30 +3,26 @@ package org.simplex;
 import java.util.Arrays;
 
 public class ArtificialBasisMethod {
-    String[][] limit = {{"-1","1","2","2"}, {"1","1","1","3"}};
-    String[] downF ={"-1","1","-2","5"};
     private CalculateSimlex calculateSimlex;
-    private int nubmersOfBasicEl;
     private SimlexMethod simlexMethod;
     private String[] downFunction;
     private FractionalNumber fractionalNumber;
-    public ArtificialBasisMethod(String[] function, String[][] limit){
-        calculateSimlex = new CalculateSimlex(function, limit);
+    public ArtificialBasisMethod(String[] function, String[][] limit, CalculateSimlex calculateSimlex){
+        this.calculateSimlex = calculateSimlex;
         fractionalNumber = new FractionalNumber();
         simlexMethod = calculateSimlex.getSimlexMethod();
         getSimplexTable(function, limit);
-        nubmersOfBasicEl = limit.length;
-        //вызов метода getSim...
     }
     public String[][] getSimplexTable(String[] function, String[][] limit){
         simlexMethod.setDownFunction(calculateSimlex.calcualteDownFunction(limit));
-        simlexMethod.setSimplexTable(calculateSimlex.calculateSimplexTable(limit, calculateSimlex.calcualteDownFunction(limit)));
+        simlexMethod.setIteration(0);
+        simlexMethod.setSimplexTable(calculateSimlex.calculateSimplexTable(limit, simlexMethod.getDownFunction()));
         if(!checkAnswer(simlexMethod.getSimplexTable(), simlexMethod.getBasis()).equals("Ok")){
             System.out.println(checkAnswer(simlexMethod.getSimplexTable(), simlexMethod.getBasis()));
             return simlexMethod.getSimplexTable();
         }
         System.out.println(checkAnswer(simlexMethod.getSimplexTable(), simlexMethod.getBasis()));
-        //simlexMethod.setDownFunction(downFunction);
+        simlexMethod.setDownFunction(downFunction);
         simlexMethod.setSimplexTable(calculateSimlex.calculateSimplexTable(newSimplexTable(simlexMethod.getSimplexTable()), downFunction));
         return simlexMethod.getSimplexTable();
         //запись в нижнюю функцию
@@ -35,7 +31,7 @@ public class ArtificialBasisMethod {
 
     public String checkAnswer(String[][] simplexTable, String[] basis){
         String[] startBasis = simlexMethod.getStartBasis();
-        for (int i = 0; i < simplexTable[0].length - 2; i++){
+        for (int i = 0; i < simplexTable[0].length - 1; i++){
             if(simplexTable[simplexTable.length - 1][i].charAt(0) == '-'){
                 simlexMethod.setAnswer("Функция неограничена");
                 return "Функция неограничена";
@@ -47,7 +43,6 @@ public class ArtificialBasisMethod {
                     simlexMethod.setAnswer("Система несовместна");
                     return "Система несовместна";
                 }
-        //simlexMethod.setSimplexTable(Arrays.copyOfRange(simplexTable, 0, simplexTable.length - 1));
         simlexMethod.setSimplexTable(simplexTable);
        return "Ok";
     }
@@ -97,12 +92,16 @@ public class ArtificialBasisMethod {
             int indexX = Integer.parseInt(newNotBasis[i].substring(1))-1;
             downF[i] = operationWithTwoNumbers(downF[i], function[indexX], "+");
         }
-
+        simlexMethod.setNotBasis(newNotBasis);
+        downF[downF.length -1] = replacingTheSign(downF[downF.length -1]);
         newSimplexTable = Arrays.copyOfRange(newSimplexTable, 0, newSimplexTable.length - 1);
         downFunction = downF;
         for (int i = 0; i < newSimplexTable.length; i++) {
             System.out.println(Arrays.toString(newSimplexTable[i]));
         }
+        System.out.println(Arrays.toString(downF));
+        System.out.println((Arrays.toString(simlexMethod.getBasis())));
+        System.out.println(Arrays.toString(simlexMethod.getNotBasis()));
         simlexMethod.setLimitations(newSimplexTable);
         return newSimplexTable;
     }
@@ -119,6 +118,7 @@ public class ArtificialBasisMethod {
         }
         return replacingNumber;
     }
+
     public String operationWithTwoNumbers(String first, String second, String operation){
         int a, b, c, d;
         simlexMethod.getFractionalNumber().convertNumber(first);

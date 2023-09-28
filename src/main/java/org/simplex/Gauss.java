@@ -1,57 +1,178 @@
 package org.simplex;
+
+import java.util.Arrays;
+
 public class Gauss {
-//    FractionalNumber fractionalNumber = new FractionalNumber(1, 1, 1 ,1);
-//    private String[][] matrix;
-//    private int size;
-//
-//    public Gauss(String[][] matrix, int size) {
-//        this.matrix = matrix;
-//        this.size = size;
-//    }
-//
-//    public boolean isSolvable() {
-////        for (int k = 0; k < size; k++) {
-//            int maxRow = k;
-//            for (int i = k + 1; i < size; i++) {
-//                if (Math.abs(matrix[i][k]) > Math.abs(matrix[maxRow][k])) {
-//                    maxRow = i;
-//                }
-//            }
-//            double[] temp = matrix[k];
-//            matrix[k] = matrix[maxRow];
-//            matrix[maxRow] = temp;
-//
-//            if (matrix[k][k] == 0.0) {
-//                return false;
-//            }
-//
-//            for (int i = k + 1; i < size; i++) {
-//                double factor = matrix[i][k] / matrix[k][k];
-//                for (int j = k + 1; j < size + 1; j++) {
-//                    matrix[i][j] -= factor * matrix[k][j];
-//                }
-//                matrix[i][k] = 0.0;
-//            }
+    FractionalNumber fractionalNumber = new FractionalNumber();
+    private String[][] matrix;
+    private int[] basis;
+    private int[] startBasis;
+    private String[] function;
+    private int size;
+    private SimlexMethod simlexMethod;
+    private CalculateSimlex calculateSimlex;
+    public Gauss(String[][] matrix, int[] basis, CalculateSimlex calculateSimlex, String[] function){
+        this.matrix = matrix;
+        this.basis = basis;
+        this.startBasis = new int[basis.length];
+        System.arraycopy(basis, 0, this.startBasis, 0, basis.length);
+        this.calculateSimlex = calculateSimlex;
+        this.simlexMethod = calculateSimlex.getSimlexMethod();
+        this.function = function;
+        calculateGauss(this.matrix, this.basis);
+    }
+
+    public void setX(int[] nubmerBasis){
+        int indexBasis = 0;
+        for(int i : nubmerBasis){
+            if(i == 1)
+                indexBasis++;
+        }
+        String[] basis = new String[indexBasis];
+        String[] startBasis = new String[indexBasis];
+        String[] notBasis = new String[nubmerBasis.length - indexBasis];
+        int i;
+        for (i = 0; i < notBasis.length; i++){
+            notBasis[i] = "x" + (i + 1);
+        }
+        for(int j = 0; j < basis.length; j++){
+            basis[j] = "x" + (i + 1);
+            startBasis[j] = "x" + (i + 1);
+            i++;
+        }
+        simlexMethod.setBasis(basis);
+        simlexMethod.setStartBasis(startBasis);
+        simlexMethod.setNotBasis(notBasis);
+    }
+
+    public void calculateGauss(String[][] matrix, int[] basis){
+        setX(basis);
+        int row = 0;
+        for (int i = 0; i < matrix.length; i++){
+            for (int j = 0; j < matrix[0].length; j++){
+                if(basis[j] == 1){
+
+                    int col = j;
+                    String obrNumber;
+                    if(matrix[i][j].charAt(0) == '-')
+                        obrNumber = operationWithTwoNumbers("-1", matrix[i][j],"/");
+                    else
+                        obrNumber = operationWithTwoNumbers("1", matrix[i][j],"/");
+
+                    for (int k = 0; k < matrix[0].length; k++)
+                        if(row != i)
+                            matrix[i][k] = operationWithTwoNumbers(matrix[i][k], obrNumber, "/");
+                    //вычитание
+                    for (int k = 0; k < matrix.length; k++){
+                        if(row != k){
+                            String coef = operationWithTwoNumbers(matrix[row][col], matrix[k][col], "*");
+                            if(coef.charAt(0) == '-')
+                                coef = replacingTheSign(coef);
+                            for(int c = 0; c < matrix[0].length; c++){
+                                String tmp =  operationWithTwoNumbers(matrix[i][c], coef, "*");
+                                if(matrix[k][col].charAt(0) == '-'){
+                                    matrix[k][c] = operationWithTwoNumbers(matrix[k][c], tmp, "+");
+                                }
+                                else
+                                    matrix[k][c] = operationWithTwoNumbers(matrix[k][c], tmp, "-");
+                            }
+                        }
+
+                    }
+
+                    row++;
+                    basis[j] = 0;//в конец
+                    break;
+                }
+            }
+        }
+        for (int i = 0; i < matrix.length; i++) {
+            System.out.println(Arrays.toString(matrix[i]));
+        }
+        String[][] simplexTable = newSimplexTable(matrix);
+//        for (int i = 0; i < simplexTable.length; i++) {
+//            System.out.println(Arrays.toString(simplexTable[i]));
 //        }
-//
-//        return true;
-//    }
-//
-//    public double[] solve() {
-//        if (!isSolvable()) {
-//            throw new RuntimeException("Система уравнений не разрешима");
-//        }
-//
-//        String[] solution = new String[size];
-//
-//        for (int i = size - 1; i >= 0; i--) {
-//            double sum = 0;
-//            for (int j = i + 1; j < size; j++) {
-//                sum += matrix[i][j] * solution[j];
-//            }
-//            solution[i] = (matrix[i][size] - sum) / matrix[i][i];
-//        }
-//
-//        return solution;
-//    }
+    }
+
+    public String[][] newSimplexTable(String[][] simplexTable){
+        int indexBasis = 0;
+        for(int i : startBasis){
+            if(i == 1)
+                indexBasis++;
+        }
+        String[][] newSimplexTable = new String[simplexTable.length + 1][simplexTable[0].length - indexBasis];
+        for(int i = 0; i < newSimplexTable.length - 1; i++){
+            int k = 0;
+            for (int j = 0; j < simplexTable[0].length - 1; j++){
+                if(startBasis[j] != 1){
+                    newSimplexTable[i][k] = simplexTable[i][j];
+                    k++;
+                }
+                newSimplexTable[i][k] = simplexTable[i][simplexTable[0].length - 1];
+            }
+        }
+        String[] downF = new String[newSimplexTable[0].length];
+        for(int i = 0; i < downF.length; i++)
+            downF[i] = "0";
+        for(int i = 0; i < newSimplexTable.length - 1; i++){
+            for(int k = 0; k < newSimplexTable[0].length; k++){
+                int indexX = Integer.parseInt(simlexMethod.getBasis()[i].substring(1))-1;
+                String tmpNumber;
+                if(k != newSimplexTable[0].length - 1)
+                    tmpNumber = operationWithTwoNumbers(replacingTheSign(newSimplexTable[i][k]), function[indexX], "*");
+                else
+                    tmpNumber = operationWithTwoNumbers(newSimplexTable[i][k], function[indexX], "*");
+                downF[k] = operationWithTwoNumbers(downF[k], tmpNumber, "+");
+            }
+        }
+
+        for(int i = 0; i < simlexMethod.getNotBasis().length; i++){
+            int indexX = Integer.parseInt(simlexMethod.getNotBasis()[i].substring(1))-1;
+            downF[i] = operationWithTwoNumbers(downF[i], function[indexX], "+");
+        }
+        for (int i = 0; i < newSimplexTable.length; i++) {
+            System.out.println(Arrays.toString(newSimplexTable[i]));
+        }
+        downF[downF.length -1] = replacingTheSign(downF[downF.length -1]);
+        newSimplexTable = Arrays.copyOfRange(newSimplexTable, 0, newSimplexTable.length - 1);
+//        downFunction = downF;
+
+        for (int i = 0; i < newSimplexTable.length; i++) {
+            System.out.println(Arrays.toString(newSimplexTable[i]));
+        }
+        System.out.println(Arrays.toString(downF));
+        return this.calculateSimlex.calculateSimplexTable(newSimplexTable, downF);
+    }
+
+    private String replacingTheSign(String replacingNumber){
+        if(replacingNumber.charAt(0) == '-'){
+            replacingNumber = replacingNumber.substring(1);
+        }
+        else
+        {
+            if(replacingNumber.charAt(0) != '0')
+                replacingNumber = "-" + replacingNumber;
+        }
+        return replacingNumber;
+    }
+
+    public String operationWithTwoNumbers(String first, String second, String operation){
+        int a, b, c, d;
+        simlexMethod.getFractionalNumber().convertNumber(first);
+        a = simlexMethod.getFractionalNumber().getA();
+        b = simlexMethod.getFractionalNumber().getB();
+        simlexMethod.getFractionalNumber().convertNumber(second);
+        c = simlexMethod.getFractionalNumber().getA();
+        d = simlexMethod.getFractionalNumber().getB();
+        return simlexMethod.getFractionalNumber().calculate(a,b,c,d, operation);
+    }
+
+    public SimlexMethod getSimlexMethod() {
+        return simlexMethod;
+    }
+
+    public CalculateSimlex getCalculateSimlex() {
+        return calculateSimlex;
+    }
 }

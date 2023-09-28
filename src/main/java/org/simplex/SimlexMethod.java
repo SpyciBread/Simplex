@@ -8,7 +8,7 @@ public class SimlexMethod {
     private String[][] limitations;
     private String[] notBasis;
     private String[] basis;
-    private String[] startBasis;
+    private String[] firstBasis;
     private String[] startNotBasis;
     private String[][] simplexTable;
     private String minElInfo = "no";
@@ -38,11 +38,11 @@ public class SimlexMethod {
     }
 
     public String[] getStartBasis() {
-        return startBasis;
+        return firstBasis;
     }
 
-    public void setStartBasis(String[] startBasis) {
-        this.startBasis = startBasis;
+    public void setStartBasis(String[] firstBasis) {
+        this.firstBasis = firstBasis;
     }
 
     public int getIteration() {

@@ -53,12 +53,12 @@ public class CalculateSimlex {
     public String[][] transitionSimplexTable(String[][] simplexTable, int row, int col){
         simplexTable[row][col] = operationWithTwoNumbers("1", simplexTable[row][col], "/");
         String[] oldNumbers = new String[simplexTable.length];
-        String[] basis = simlexMethod.getBasis();
+        String[] basic = simlexMethod.getBasis();
         String[] notBasis = simlexMethod.getNotBasis();
-        String tmpX = basis[row];
-        basis[row] = notBasis[col];
+        String tmpX = basic[row];
+        basic[row] = notBasis[col];
         notBasis[col] = tmpX;
-        simlexMethod.setBasis(basis);
+        simlexMethod.setBasis(basic);
         simlexMethod.setNotBasis(notBasis);
         for (int i = 0; i < simplexTable[row].length; i++){
             if(i != col){
@@ -86,22 +86,37 @@ public class CalculateSimlex {
         for (int i = 0; i < simplexTable.length; i++) {
             System.out.println(Arrays.toString(simplexTable[i]));
         }
-        System.out.println(Arrays.toString(basis));
+        System.out.println(Arrays.toString(basic));
         System.out.println(Arrays.toString(notBasis));
-        getAnswer(simplexTable, simlexMethod.getBasis(), simlexMethod.getNotBasis());
         simlexMethod.setSimplexTable(simplexTable);
+        getAnswer(simplexTable, simlexMethod.getBasis(), simlexMethod.getNotBasis());
         return simplexTable;
+    }
+
+    public void setX(String[][] limit){
+        String[] basis = new String[limit.length];
+        String[] startBasis = new String[limit.length];
+        String[] notBasis = new String[limit[0].length - 1];
+        int i;
+        for (i = 0; i < limit[0].length - 1; i++){
+            notBasis[i] = "x" + (i + 1);
+        }
+        for(int j = 0; j < limit.length; j++){
+            basis[j] = "x" + (i + 1);
+            startBasis[j] = "x" + (i + 1);
+            i++;
+        }
+        simlexMethod.setBasis(basis);
+        simlexMethod.setStartBasis(startBasis);
+        simlexMethod.setNotBasis(notBasis);
     }
 
     public String[][] calculateSimplexTable(String[][] limit, String[] downFunction){
         int numRows = limit.length;
         int numCols = limit[0].length;
-        simlexMethod.setIteration(0);
-        simlexMethod.setBasis(new String[]{"x6","x7","x8"});
-        simlexMethod.setStartBasis(new String[]{"x6","x7","x8"});
-
-        simlexMethod.setNotBasis(new String[]{"x1","x2","x3","x4","x5"});
-        simlexMethod.setStartNotBasis(simlexMethod.getNotBasis());
+        if(simlexMethod.getIteration() == 0 && simlexMethod.getBasis() == null)
+            setX(limit);
+        simlexMethod.addIteration();
         String[][] simlexTable = new String[numRows + 1][numCols];
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
@@ -109,23 +124,22 @@ public class CalculateSimlex {
             }
         }
         simlexTable[numRows] = downFunction;
-        String[][] wrongSolution = {{"0"},{"0"}};
         String[][] noSolution = {{"n"},{"n"}};
         simlexMethod.setSimplexTable(simlexTable);
         while (true){
-            if(Arrays.deepEquals(helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction), wrongSolution)){
-                while (true){
-                    if(Arrays.deepEquals(helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction), wrongSolution)){
-                        helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction);
-                    }
-                    else {
-                        if (Arrays.deepEquals(helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction), noSolution)){
-                            return simlexMethod.getSimplexTable();
-                        }
-                        else break;
-                    }
+            if(Arrays.deepEquals(helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction), noSolution)){
+                break;
+//                while (true){
+//                    if(Arrays.deepEquals(helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction), wrongSolution)){
+//                        helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction);
+//                    }
+//                    else {
+//                        if (Arrays.deepEquals(helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction), noSolution)){
+//                            return simlexMethod.getSimplexTable();
+//                        }
+//                        else break;
+//                    }
                 }
-            }
             else{
                 if(simlexMethod.getMinElInfo().equals("Calculated"))
                     break;
@@ -134,20 +148,23 @@ public class CalculateSimlex {
                 helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction);
             }
         }
+        getAnswer(helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction), simlexMethod.getBasis(), simlexMethod.getNotBasis());
         return helpCalculateSimplexTable(simlexMethod.getSimplexTable(), downFunction);
     }
     public String[][] helpCalculateSimplexTable(String[][] simlexTable, String[] downFunction){
-        simlexMethod.addIteration();
+        //simlexMethod.addIteration();
         String minEl = findMinEl(Arrays.copyOfRange(downFunction, 0, downFunction.length - 1));
 
         int indexOfMinEl = 0;
         if(minEl.equals("Calculated")){
             simlexMethod.setMinElInfo("Calculated");
+            simlexMethod.setSimplexTable(simlexTable);
             return simlexTable;
         }
 
         if(minEl.equals("Функция неограничена")){
             simlexMethod.setMinElInfo("Функция неограничена");
+            simlexMethod.setSimplexTable(simlexTable);
             return new String[][]{{"n"}, {"n"}};
         }
 
@@ -170,9 +187,8 @@ public class CalculateSimlex {
             }
         }
         if(potentialReferenceElList.size() == 0){
-            //поиск в другом отрицательном элементе
-            simlexMethod.getNegativeElements().add(indexOfMinEl);
-            return new String[][]{{"0"}, {"0"}};
+            simlexMethod.setSimplexTable(simlexTable);
+            return new String[][]{{"n"}, {"n"}};
         }
 
         String[] potentialReferenceArray = potentialReferenceElList.toArray(new String[potentialReferenceElList.size()]);
@@ -242,12 +258,12 @@ public class CalculateSimlex {
     }
 
     public String getAnswer(String[][] simlexTable, String[] basis, String[] notBasis){
-        for (int i = 0; i < simlexTable[0].length - 2; i++){
-            if(simlexTable[simlexTable.length - 1][i].charAt(0) == '-'){
-                simlexMethod.setAnswer("Функция неограничена");
-                return "Функция неограничена";
-            }
+        String[][] noSolution = {{"n"},{"n"}};
+        if(Arrays.deepEquals(noSolution, simlexTable)){
+            simlexMethod.setAnswer("Функция неограничена");
+            return "Функция неограничена";
         }
+
         int sizeAnswer = basis.length + notBasis.length;
         String[] answer = new String[sizeAnswer];
         for(int i = 0; i < answer.length; i++){
