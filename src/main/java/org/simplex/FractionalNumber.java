@@ -93,6 +93,7 @@ public class FractionalNumber {
         String result = "";
         int chislitel;
         int znamenatel;
+        int i = 0,j = 0;
         switch (operation){
             case "+" :
                 chislitel = a * (findLCM(b,d)/ b) + c * (findLCM(b,d) / d);
@@ -100,7 +101,18 @@ public class FractionalNumber {
                 result = toNormalNumber(chislitel, znamenatel);
                 break;
             case "-" :
-                chislitel = a * (findLCM(b,d)/ b) - c * (findLCM(b,d) / d);
+                i = a * (findLCM(b,d)/ b);
+                j =  c * (findLCM(b,d) / d);
+
+                if(i < 0 && j < 0)
+                    chislitel = i + Math.abs(j);
+                else if(i < 0 && j > 0)
+                    chislitel = i - j;
+                else if(i > 0 && j > 0)
+                    chislitel = i - j;
+                else //i > 0 j < 0
+                    chislitel = i + (-j);
+
                 znamenatel = findLCM(b,d);
                 result = toNormalNumber(chislitel, znamenatel);
                 break;
@@ -112,6 +124,11 @@ public class FractionalNumber {
             case "/" :
                 chislitel = a*d;
                 znamenatel = b*c;
+                if(znamenatel < 0 && chislitel > 0)
+                {
+                    znamenatel = Math.abs(znamenatel);
+                    chislitel = -chislitel;
+                }
                 result = toNormalNumber(chislitel, znamenatel);
                 break;
         }
@@ -120,17 +137,22 @@ public class FractionalNumber {
 
     public String toNormalNumber(int chislitel, int znamenatel){
         int gcd = gcd(chislitel, znamenatel);
-        while (Math.abs(gcd) != 1){
-            chislitel /= Math.abs(gcd);
-            znamenatel /= Math.abs(gcd);
+        while (gcd != 1){
+            chislitel /= gcd;
+            znamenatel /= gcd;
             gcd = gcd(chislitel, znamenatel);
+        }
+        if(znamenatel < 0 && chislitel > 0)
+        {
+            znamenatel = Math.abs(znamenatel);
+            chislitel = -chislitel;
         }
         if(znamenatel == 1)
             return "" + chislitel;
         if(chislitel == 0)
             return "0";
 
-        return chislitel + "/" + Math.abs(znamenatel);
+        return chislitel + "/" + znamenatel;
     }
 
     public int findLCM(int num1, int num2) {

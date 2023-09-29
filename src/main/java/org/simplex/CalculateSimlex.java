@@ -123,6 +123,16 @@ public class CalculateSimlex {
                 simlexTable[i][j] = limit[i][j];
             }
         }
+
+        for (int i = 0; i < numRows; i++){
+            if(simlexTable[i][numCols - 1].charAt(0) == '-'){
+                for (int j = 0; j < numRows; j++){
+                    simlexTable[i][j] = operationWithTwoNumbers("-1", simlexTable[i][j], "*");
+                }
+            }
+
+        }
+
         simlexTable[numRows] = downFunction;
         String[][] noSolution = {{"n"},{"n"}};
         simlexMethod.setSimplexTable(simlexTable);
@@ -197,10 +207,12 @@ public class CalculateSimlex {
 
 
         for(int i = 0; i < numRows - 1; i++) {
-            String el = operationWithTwoNumbers(simlexTable[i][simlexTable[0].length - 1], simlexTable[i][indexOfMinEl], "/");
-            if(referenceEl.equals(el)){
-                System.out.println(simlexTable[i][indexOfMinEl]);
-                return transitionSimplexTable(simlexTable, i, indexOfMinEl);
+            if(!simlexTable[i][indexOfMinEl].equals("0")){
+                String el = operationWithTwoNumbers(simlexTable[i][simlexTable[0].length - 1], simlexTable[i][indexOfMinEl], "/");
+                if(referenceEl.equals(el)){
+                    System.out.println(simlexTable[i][indexOfMinEl]);
+                    return transitionSimplexTable(simlexTable, i, indexOfMinEl);
+                }
             }
         }
         simlexMethod.setSimplexTable(simlexTable);
